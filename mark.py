@@ -151,7 +151,7 @@ def main(v):
             
             temp=copy.deepcopy(mark.getImage())
             cv2.drawMarker(temp,(tx+5,ty-5),cfg.MARKER_COLOR,cv2.MARKER_TRIANGLE_DOWN,8)
-            cv2.putText(temp,'type class_num',(tx+10,ty),cv2.FONT_HERSHEY_PLAIN,1,cfg.CLS_NUM_COLOR)
+            cv2.putText(temp,'type class_num',(tx+10,ty),cv2.FONT_HERSHEY_COMPLEX,0.5,cfg.CLS_NUM_COLOR)
             cv2.imshow('image',temp)
 
             while(mode=='type'):
