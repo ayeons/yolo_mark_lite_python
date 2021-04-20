@@ -104,6 +104,7 @@ def main(v):
                         
                         if mark.getLenDatas()>0:
                             mark.remove()
+                            train_datas[mark.getPath()]=mark.makeText()
                             if mark.getLenDatas()<=0:
                                 train_datas.pop(mark.getPath())
                                 cv2.setWindowTitle('key',f'marked_data_count : {len(train_datas)}')
