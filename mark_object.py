@@ -1,5 +1,5 @@
 
-class SaveData(Exception):
+class SaveAndExit(Exception):
     def __init__(self,msg=None):
         self.msg=msg
     def __str__(self):
@@ -31,24 +31,23 @@ class Mark:
         self._datas.append(data)
         self._images.append(image)
 
-    def getPosition(self):
-        return (self._datas[-1][0],self._datas[-1][1],self._datas[-1][2],self._datas[-1][3])
-
     def setPosition(self,position):
-        self._datas[-1][0]=position[0]
-        self._datas[-1][1]=position[1]
-        self._datas[-1][2]=position[2]
-        self._datas[-1][3]=position[3]
+        self._datas[-1][1]=position[0]
+        self._datas[-1][2]=position[1]
+        self._datas[-1][3]=position[2]
+        self._datas[-1][4]=position[3]
 
     def setClassNum(self,class_num):
-        self._datas[-1][-1]=class_num
+        self._datas[-1][0]=class_num
 
     def makeText(self):
         result=''
-        result+=f'{self._path} '
-        for j in self._datas:
-            result+=f'{j[0]},{j[1]},{j[2]},{j[3]},{j[4]} '
         
+        for j in range(len(self._datas)):
+            if j!=0:
+                result+='\n'
+            result+=f'{self._datas[j][0]} {self._datas[j][1]} {self._datas[j][2]} {self._datas[j][3]} {self._datas[j][4]}'
+
         return result
     
     def getLenDatas(self):
