@@ -31,6 +31,9 @@ class Mark:
         self._datas.append(data)
         self._images.append(image)
 
+    def getPosition(self):
+        return (self._datas[-1][0],self._datas[-1][1],self._datas[-1][2],self._datas[-1][3])
+
     def setPosition(self,position):
         self._datas[-1][0]=position[0]
         self._datas[-1][1]=position[1]

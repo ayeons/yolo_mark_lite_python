@@ -35,8 +35,11 @@ def drawRect(e,x,y,flag,param):
     elif e==cv2.EVENT_LBUTTONUP:
         
         clicked=False
-        
-        pos=[tx,ty,x,y]
+        w=abs(x-tx)
+        h=abs(y-ty)
+        x_start=min(tx,x)
+        y_start=min(ty,y)
+        pos=[x_start,y_start,w,h]
         param.setPosition(pos)
         mode='type'
 
@@ -150,8 +153,14 @@ def main(v):
             cv2.setMouseCallback('image',lambda e,x,y,f,p:None)
             
             temp=copy.deepcopy(mark.getImage())
-            cv2.drawMarker(temp,(tx+5,ty-5),cfg.MARKER_COLOR,cv2.MARKER_TRIANGLE_DOWN,8)
-            cv2.putText(temp,'type class_num',(tx+10,ty),cv2.FONT_HERSHEY_COMPLEX,0.5,cfg.CLS_NUM_COLOR)
+            px,py,pw,ph=mark.getPosition()
+            marker=cv2.MARKER_TRIANGLE_DOWN
+            if py<=10:
+                py=py+ph+10
+                marker=cv2.MARKER_TRIANGLE_UP
+            cv2.drawMarker(temp,(px+5,py-5),cfg.MARKER_COLOR,marker,8)
+            
+            cv2.putText(temp,'type class_num',(px+10,py),cv2.FONT_HERSHEY_COMPLEX,0.5,cfg.CLS_NUM_COLOR)
             cv2.imshow('image',temp)
 
             while(mode=='type'):
@@ -162,20 +171,20 @@ def main(v):
                         temp=copy.deepcopy(mark.getImage())
                         keys+=chr(key)
                         
-                        cv2.drawMarker(temp,(tx+5,ty-5),cfg.MARKER_COLOR,cv2.MARKER_TRIANGLE_DOWN,8)
-                        cv2.putText(temp,keys,(tx+10,ty),cv2.FONT_HERSHEY_PLAIN,1,cfg.CLS_NUM_COLOR)
+                        cv2.drawMarker(temp,(px+5,py-5),cfg.MARKER_COLOR,marker,8)
+                        cv2.putText(temp,keys,(px+10,py),cv2.FONT_HERSHEY_PLAIN,1,cfg.CLS_NUM_COLOR)
                         cv2.imshow('image',temp)
                     elif key==8:
                         if len(keys)>0:
                             temp=copy.deepcopy(mark.getImage())
                             keys=keys[:-1]
-                            cv2.drawMarker(temp,(tx+5,ty-5),cfg.MARKER_COLOR,cv2.MARKER_TRIANGLE_DOWN,8)
-                            cv2.putText(temp,keys,(tx+10,ty),cv2.FONT_HERSHEY_PLAIN,1,cfg.CLS_NUM_COLOR)
+                            cv2.drawMarker(temp,(px+5,py-5),cfg.MARKER_COLOR,marker,8)
+                            cv2.putText(temp,keys,(px+10,py),cv2.FONT_HERSHEY_PLAIN,1,cfg.CLS_NUM_COLOR)
                             cv2.imshow('image',temp)
                     elif cfg.SAVE.__contains__(chr(key)):
                         if not keys=='':
-                            cv2.drawMarker(mark.getImage(),(tx+5,ty-5),cfg.MARKER_COLOR,cv2.MARKER_TRIANGLE_DOWN,8)
-                            cv2.putText(mark.getImage(),keys,(tx+10,ty),cv2.FONT_HERSHEY_PLAIN,1,cfg.CLS_NUM_COLOR)
+                            cv2.drawMarker(mark.getImage(),(px+5,py-5),cfg.MARKER_COLOR,marker,8)
+                            cv2.putText(mark.getImage(),keys,(px+10,py),cv2.FONT_HERSHEY_PLAIN,1,cfg.CLS_NUM_COLOR)
                             mark.setClassNum(keys)
                             train_datas[mark.getPath()]=mark.makeText()
                             cv2.setWindowTitle('key',f'marked_data_count : {len(train_datas)}')
