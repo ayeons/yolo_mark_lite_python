@@ -25,11 +25,11 @@ you wanna config vars such as path,key,color and cache-size?
 
 ### format
 ```
-./data/images/ptoilet.jpg 405,325,552,548,2 557,294,682,501,2 422,23,565,147,1 
-./data/images/street.jpg 222,303,305,388,5 78,124,167,308,6 413,177,441,240,7 323,193,341,233,7 125,345,156,427,0 
+./data/images/ptoilet.jpg 419,9,148,134,2 397,315,162,233,1 561,294,116,202,1 
+./data/images/street.jpg 124,342,31,90,7 97,324,29,107,7 221,307,80,79,3 81,127,84,175,4 409,172,34,66,5 325,195,17,38,5 
 ```
 * Row format path box1 box2 ...
-* Box format : startx,starty,endx,endy,class_num
+* Box format : x_start,y_start,box_width,box_height,class_num
 
 --------
 ![st](https://user-images.githubusercontent.com/38782146/115362530-98a96180-a1fc-11eb-8219-43f4a36a59e0.jpg)
