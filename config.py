@@ -4,19 +4,18 @@
 IMG_PATH='./data/images'
 # Directory in which images to mark
 
-OUPUT_PATH='./data/train.txt'
+TRAIN_TXT_PATH='./data/train.txt'
 
-#marked_image_cache_size
-
-CACHE_NUM=30
-# 10 ~ images_count
-# consider available memorysize
 
 # key config
 
 PREV=['a','A']
 NEXT=['d','D']
-SAVE=['s','S']
+PREV10=['s','S']
+NEXT10=['w','W']
+PREV_ONLY_NONMARKED=['q','Q']
+NEXT_ONLY_NONMARKED=['e','E']
+SAVE_LABEL=['f','F']
 REMOVE=['r','R']
 
 # color

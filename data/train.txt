@@ -1,2 +1,2 @@
-./data/images/ptoilet.jpg 419,9,148,134,2 397,315,162,233,1 561,294,116,202,1 
-./data/images/street.jpg 124,342,31,90,7 97,324,29,107,7 221,307,80,79,3 81,127,84,175,4 409,172,34,66,5 325,195,17,38,5 
+./data/images/ptoilet.jpg
+./data/images/street.jpg

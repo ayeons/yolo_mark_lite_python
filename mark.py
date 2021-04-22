@@ -5,10 +5,9 @@ from absl import app, flags
 import copy
 import mark_object as ob
 import config as cfg
-import glob
 
-flags.DEFINE_string('images_path','./data/images','image directory path')
-flags.DEFINE_string('output_path','./data/train.txt','output data path')
+flags.DEFINE_string('i',cfg.IMG_PATH,'image directory path')
+
 
 clicked=False
 sx=-1
@@ -17,7 +16,7 @@ th=-1
 
 mode='draw'
 control=False
-marks=[]
+mark=None
 font=cv2.FONT_HERSHEY_COMPLEX
 font_size=0.5
 
@@ -63,10 +62,7 @@ def makeMark(path):
         for i in boxes:
             timg=copy.deepcopy(mark.getImage())
             n,x,y,w,h=i.split(' ')
-            x=float(x)
-            y=float(y)
-            w=float(w)
-            h=float(h)
+            x,y,w,h=list(map(float,(x,y,w,h)))
             rx=int(x*len(timg[0]))
             ry=int(y*len(timg))
             rw=int(w*len(timg[0]))
@@ -86,115 +82,144 @@ def makeMark(path):
     return mark        
 
 def saveData():
-    for i in marks:
-        path=i.getPath()
-        txt_path=path[:path.rfind('.')]+'.txt'
-        if i.getLenDatas()<=0:
-            
-            if os.path.isfile(txt_path):
-                os.remove(txt_path)
-        else:
-            f=open(txt_path,'w')
-            f.write(i.makeText())
-            f.close()
+    global mark
+    path=mark.getPath()
+    txt_path=path[:path.rfind('.')]+'.txt'
+    if mark.getLenDatas()<=0:
+        if os.path.isfile(txt_path):
+            os.remove(txt_path)
+    else:
+        f=open(txt_path,'w')
+        f.write(mark.makeText())
+        f.close()
 
 def main(v):
-    global mode,key_draw,key_type,key_draw,key_type,sx,sy,th,marks
-    dir_path=flags.FLAGS.images_path+'/'
+    global mode,key_draw,key_type,key_draw,key_type,sx,sy,th,mark
+    dir_path=flags.FLAGS.i+'/'
     
     directory=[i for i in os.listdir(dir_path) if not i.endswith('txt')]
     
     if len(directory)<=0:
         raise SystemError('dir empty')
-    cache_num=cfg.CACHE_NUM
-    if cache_num<10:
-        cache_num=10
-    if cache_num>len(directory):
-        cache_num=len(directory)
-    marks=[makeMark(dir_path+directory[i]) for i in range(cache_num)]
-    index=0
     
-    key_draw=[[0 for i in range(400)] for i in range(300)]
-    key_type=[[0 for i in range(400)] for i in range(300)]
+    key_draw=[[0 for i in range(400)] for i in range(400)]
+    key_type=[[0 for i in range(400)] for i in range(400)]
     key_draw=np.uint8(key_draw)
     key_type=np.uint8(key_type)
 
     cv2.namedWindow('image')
-    cv2.moveWindow('image',710,150)
+    cv2.moveWindow('image',705,150)
     cv2.namedWindow('key')
     cv2.moveWindow('key',300,150)
-    cv2.putText(key_draw,'Draw boxes',(10,30),cv2.FONT_HERSHEY_TRIPLEX,1,200,2)
-    cv2.putText(key_draw,'mouse_drag : draw_box',(10,70),cv2.FONT_HERSHEY_TRIPLEX,0.8,150,2)
-    cv2.putText(key_draw,f'{cfg.PREV} : prev',(10,100),cv2.FONT_HERSHEY_TRIPLEX,0.8,150,2)
-    cv2.putText(key_draw,f'{cfg.NEXT} : next',(10,130),cv2.FONT_HERSHEY_TRIPLEX,0.8,150,2)
-    cv2.putText(key_draw,f'{cfg.REMOVE} : remove',(10,160),cv2.FONT_HERSHEY_TRIPLEX,0.8,150,2)
-    cv2.putText(key_draw,'enter : write and exit',(10,190),cv2.FONT_HERSHEY_TRIPLEX,0.8,150,2)
-    cv2.putText(key_draw,'esc : exit',(10,220),cv2.FONT_HERSHEY_TRIPLEX,0.8,150,2)
+    cv2.putText(key_draw,'Drawing',(10,30),cv2.FONT_HERSHEY_COMPLEX,1,200,2)
+    cv2.putText(key_draw,'mouse_drag : draw box',(10,70),cv2.FONT_HERSHEY_SIMPLEX,0.8,150,2)
+    cv2.putText(key_draw,f'{cfg.PREV} : prev',(10,105),cv2.FONT_HERSHEY_SIMPLEX,0.7,150,2)
+    cv2.putText(key_draw,f'{cfg.NEXT} : next',(10,140),cv2.FONT_HERSHEY_SIMPLEX,0.7,150,2)
+    cv2.putText(key_draw,f'{cfg.PREV10} : prev10',(10,175),cv2.FONT_HERSHEY_SIMPLEX,0.7,150,2)
+    cv2.putText(key_draw,f'{cfg.NEXT10} : next10',(10,210),cv2.FONT_HERSHEY_SIMPLEX,0.7,150,2)
+    cv2.putText(key_draw,f'{cfg.PREV_ONLY_NONMARKED} : prev_only_nonMarked',(10,245),cv2.FONT_HERSHEY_SIMPLEX,0.7,150,2)
+    cv2.putText(key_draw,f'{cfg.NEXT_ONLY_NONMARKED} : next_only_nonMarked',(10,280),cv2.FONT_HERSHEY_SIMPLEX,0.7,150,2)
+    cv2.putText(key_draw,f'{cfg.REMOVE} : remove',(10,315),cv2.FONT_HERSHEY_SIMPLEX,0.8,150,2)
+    cv2.putText(key_draw,'esc : exit',(10,350),cv2.FONT_HERSHEY_SIMPLEX,0.8,150,2)
     
-    cv2.putText(key_type,'Type class_num',(10,30),cv2.FONT_HERSHEY_TRIPLEX,1,200,2)
-    cv2.putText(key_type,'number : class_num',(10,70),cv2.FONT_HERSHEY_TRIPLEX,0.8,150,2)
-    cv2.putText(key_type,'back_space : delete num',(10,100),cv2.FONT_HERSHEY_TRIPLEX,0.8,150,2)
-    cv2.putText(key_type,f'{cfg.SAVE} : save',(10,130),cv2.FONT_HERSHEY_TRIPLEX,0.8,150,2)
-    cv2.putText(key_type,f'{cfg.REMOVE} : remove',(10,160),cv2.FONT_HERSHEY_TRIPLEX,0.8,150,2)
-    cv2.putText(key_type,'esc : exit',(10,190),cv2.FONT_HERSHEY_TRIPLEX,0.8,150,2)
+    cv2.putText(key_type,'Labeling',(10,30),cv2.FONT_HERSHEY_COMPLEX,1,200,2)
+    cv2.putText(key_type,'number : label_num',(10,70),cv2.FONT_HERSHEY_SIMPLEX,0.8,150,2)
+    cv2.putText(key_type,'back_space : delete num',(10,105),cv2.FONT_HERSHEY_SIMPLEX,0.8,150,2)
+    cv2.putText(key_type,f'{cfg.SAVE_LABEL} : save label->Drawing',(10,140),cv2.FONT_HERSHEY_SIMPLEX,0.7,150,2)
+    cv2.putText(key_type,f'{cfg.REMOVE} : remove->Drawing',(10,175),cv2.FONT_HERSHEY_SIMPLEX,0.7,150,2)
+    cv2.putText(key_type,'esc : exit',(10,210),cv2.FONT_HERSHEY_SIMPLEX,0.8,150,2)
     
-    mark=marks[index%cache_num]
+    index=0
+    mark=makeMark(dir_path+directory[index])
     cv2.setMouseCallback('image',drawRect,mark)
     while(1):
         if mode=='draw':
             cv2.imshow('key',key_draw)
             while(mode=='draw'):
-                mark=marks[index%cache_num]
+                
                 cv2.setMouseCallback('image',drawRect,mark)
-                new_title=mark.getPath()
+                mpath=mark.getPath()
+                mpath=mpath[mpath.rfind('/')+1:]
+                new_title=mpath+f'  dir_index : {index}'
                 cv2.setWindowTitle('image',new_title)
                 cv2.imshow('image',mark.getImage())
                 key=cv2.waitKey(1)
                 if key>=0:
                     if key==27:
-                        raise SystemExit()
+                        raise ob.SaveAndExit()
                     elif cfg.REMOVE.__contains__(chr(key)):
                         
                         if mark.getLenDatas()>0:
                             mark.remove()
-                                
-                    elif key == 13:
-                        raise ob.SaveAndExit()
+                        if mark.getLenDatas()<=0:
+                            cv2.setWindowTitle('key','key')
                     elif cfg.PREV.__contains__(chr(key)):
-                        
-                        if index%cache_num!=0 or cache_num>=len(directory):
-                            index-=1
+                        if index<=0:
+                            index=len(directory)-1
                         else:
+                            index-=1
+                        saveData()
+                        mark=makeMark(dir_path+directory[index])    
+                    elif cfg.PREV10.__contains__(chr(key)):
+                        if index<=0:
+                            index=len(directory)-1
+                        else:
+                            index-=10
+                            if index<0:
+                                index=0
+                        saveData()
+                        mark=makeMark(dir_path+directory[index])    
+                    elif cfg.PREV_ONLY_NONMARKED.__contains__(chr(key)):
+                        saveData()
+                        c=0
+                        while(1):
                             if index<=0:
                                 index=len(directory)-1
-                            elif index%cache_num==0:
+                            else:
                                 index-=1
-                            marks=[makeMark(dir_path+directory[i]) for i in range(index-(index%cache_num),index+1)]
+                            c+=1
+                            t=dir_path+directory[index]
+                            if not os.path.isfile(t[:t.rfind('.')]+'.txt'):
+                                break
+                            if c>=len(directory):
+                                cv2.setWindowTitle('key', '********** Marked all ********************')
+                                break
                             
-                            
+                        saveData()
+                        mark=makeMark(dir_path+directory[index])    
                     elif cfg.NEXT.__contains__(chr(key)):
-                        if cache_num>=len(directory):
-                            index+=1
+                        if index>=len(directory)-1:
+                            index=0
                         else:
+                            index+=1
+                        saveData()
+                        mark=makeMark(dir_path+directory[index])
+                    elif cfg.NEXT10.__contains__(chr(key)):
+                        if index>=len(directory)-1:
+                            index=0
+                        else:
+                            index+=10
+                            if index>len(directory)-1:
+                                index=len(directory)-1
+                        saveData()
+                        mark=makeMark(dir_path+directory[index])
+                    elif cfg.NEXT_ONLY_NONMARKED.__contains__(chr(key)):
+                        saveData()
+                        c=0
+                        while(1):
                             if index>=len(directory)-1:
                                 index=0
-                                if index+cache_num>len(directory):
-                                    saveData()
-                                    marks=[makeMark(dir_path+directory[i]) for i in range(index,len(directory))]
-                                else:
-                                    saveData()    
-                                    marks=[makeMark(dir_path+directory[i]) for i in range(index,index+cache_num)]
-                            elif index%cache_num==cache_num-1:
-                                index+=1
-                                if index+cache_num>len(directory):
-                                    saveData()
-                                    marks=[makeMark(dir_path+directory[i]) for i in range(index,len(directory))]
-                                else:    
-                                    saveData()
-                                    marks=[makeMark(dir_path+directory[i]) for i in range(index,index+cache_num)]
                             else:
                                 index+=1
-                
+                            c+=1
+                            t=dir_path+directory[index]
+                            if not os.path.isfile(t[:t.rfind('.')]+'.txt'):
+                                break
+                            if c>=len(directory):
+                                cv2.setWindowTitle('key', '********** Marked all ********************')
+                                break
+                        
+                        mark=makeMark(dir_path+directory[index])
 
         elif mode=='type':
             cv2.imshow('key',key_type)
@@ -232,7 +257,7 @@ def main(v):
                             cv2.drawMarker(temp,(px+5,py-5),cfg.MARKER_COLOR,marker,8)
                             cv2.putText(temp,keys,(px+10,py),font,font_size,cfg.CLS_NUM_COLOR)
                             cv2.imshow('image',temp)
-                    elif cfg.SAVE.__contains__(chr(key)):
+                    elif cfg.SAVE_LABEL.__contains__(chr(key)):
                         if not keys=='':
                             cv2.drawMarker(mark.getImage(),(px+5,py-5),cfg.MARKER_COLOR,marker,8)
                             cv2.putText(mark.getImage(),keys,(px+10,py),font,font_size,cfg.CLS_NUM_COLOR)
@@ -257,5 +282,3 @@ if __name__=='__main__':
         print(e)
     except ob.SaveAndExit:
         saveData()
-
-# 'C:/users/user/desktop/plants/'
