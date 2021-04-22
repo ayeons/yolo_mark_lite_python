@@ -1,6 +1,6 @@
 # YOLO_MARK_LITE_PYTHON
 
-## Marking images for Yolo_train_datas(.py) simple and light
+## Marking images for Yolo_train_datas(.py) simple and light  
 ---------------
 ### dependency
 
@@ -9,27 +9,32 @@
 * opencv-python==4.5.1.48  
 * six==1.15.0
 
--------------------
 ```
 $ pip install -r requirements.txt
-```
-### execute
+```  
 -------------------
-```
-$ python mark.py [--images_path ./data/images] [--output_path ./data/train.txt]
-```    
-if omit --images_path or --output_path, uses paths in config.py that you can edit
 
-you wanna config vars such as path,key,color and cache-size?
-### see config.py  
-
-### format
+### marking
 ```
-./data/images/ptoilet.jpg 419,9,148,134,2 397,315,162,233,1 561,294,116,202,1 
-./data/images/street.jpg 124,342,31,90,7 97,324,29,107,7 221,307,80,79,3 81,127,84,175,4 409,172,34,66,5 325,195,17,38,5 
+$ python mark.py [-i ./data/images]
 ```
-* Row format path box1 box2 ...
-* Box format : x_start,y_start,box_width,box_height,class_num
 
---------
-![st](https://user-images.githubusercontent.com/38782146/115362530-98a96180-a1fc-11eb-8219-43f4a36a59e0.jpg)
+### make_train_list  
+> list images that have its own boxes(.txt)
+```
+$ python make_train.py [-i ./data/images] [-o ./data/train.txt]
+```
+
+if omit -i(image_path) or -o(output_train_path), uses paths in config.py that you can edit  
+you wanna config vars such as keys,colors and paths?
+> ### see config.py   
+------------------
+
+* Box format : label_num x_center y_center box_width box_height
+```
+1 0.6451822916666666 0.12413194444444445 0.17838541666666666 0.234375
+2 0.806640625 0.6805555555555556 0.16015625 0.3541666666666667
+```  
+-----------
+![st](https://user-images.githubusercontent.com/38782146/115654953-2ad07780-a36d-11eb-8377-8ba1485779c2.jpg)
+
